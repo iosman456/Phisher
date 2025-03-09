@@ -27,7 +27,7 @@ def generate_report():
     logging.info("Generating report...")
 
 def main():
-    smtp_server = "smtp.example.com"
+    smtp_server = "localhost"
     port = 465
     sender_email = "your_email@example.com"
     sender_password = "your_password"
