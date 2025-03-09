@@ -81,7 +81,7 @@ def login():
     password = request.form['password']
     
     # Kullanıcı bilgilerini log dosyasına kaydetme
-    logging.info(f"Username: {username}, Password: {password}")
+    logging.info("Username: {}, Password: {}".format(username, password))
     
     # Burada olası bir SMTP sunucusuna kullanıcı bilgilerini gönderme kodu eklenebilir
     
